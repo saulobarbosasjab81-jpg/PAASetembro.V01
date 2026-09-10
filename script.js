@@ -158,7 +158,7 @@ function serviceStats(service, data) {
   else if (deviation > 1) status = 'adiantado';
   else if (deviation >= -1) status = 'noPrazo';
   else if (deviation >= -5) status = 'risco';
-  else if (deviation >= -1000) status = 'atrasado';
+  else status = 'atrasado';
 
   return {
     planCumulative,

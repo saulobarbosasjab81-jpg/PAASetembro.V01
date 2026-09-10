@@ -353,7 +353,14 @@ function renderCharts(data, index, stats) {
     },
     options: {
       ...chartDefaults,
-      plugins: { ...chartDefaults.plugins, legend: { display: false } }
+      plugins: { ...chartDefaults.plugins, legend: { display: false } },
+      scales: {
+        ...chartDefaults.scales,
+        x: {
+          ...chartDefaults.scales.x,
+          ticks: { ...chartDefaults.scales.x.ticks, autoSkip: false, maxTicksLimit: undefined, maxRotation: 60, minRotation: 60 }
+        }
+      }
     }
   });
 

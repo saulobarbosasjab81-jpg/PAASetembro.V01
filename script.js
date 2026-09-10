@@ -339,6 +339,7 @@ function renderCharts(data, index, stats) {
     .join('');
 
   const production = data.services.slice(0, 4);
+  const productionColors = ['#68a7ff', '#6ce0a6', '#f2ca61', '#f07878', '#7fdaf7'];
   makeChart('production-chart', {
     type: 'bar',
     data: {
@@ -346,7 +347,7 @@ function renderCharts(data, index, stats) {
       datasets: production.map((service, serviceIndex) => ({
         label: service.name,
         data: service.actual,
-        backgroundColor: ['#68a7ff', '#6ce0a6', '#f2ca61', '#f07878', '#7fdaf7'][serviceIndex % 5],
+        backgroundColor: productionColors[serviceIndex % productionColors.length],
         borderRadius: 3
       }))
     },
@@ -355,6 +356,10 @@ function renderCharts(data, index, stats) {
       plugins: { ...chartDefaults.plugins, legend: { display: false } }
     }
   });
+
+  $('production-legend').innerHTML = production
+    .map((service, serviceIndex) => `<span><i style="background:${productionColors[serviceIndex % productionColors.length]}"></i>${service.name}</span>`)
+    .join('');
 
   makeChart('rain-chart', {
     type: 'bar',

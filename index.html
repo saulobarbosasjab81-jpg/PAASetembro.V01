@@ -8,10 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=20260910-21">
+  <link rel="stylesheet" href="style.css?v=20260910-22">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.3/papaparse.min.js" defer></script>
-  <script src="script.js?v=20260910-21" defer></script>
+  <script src="script.js?v=20260910-22" defer></script>
 </head>
 <body>
   <div class="app-shell">
@@ -51,7 +51,6 @@
         <article class="panel chart-panel"><div class="panel-heading"><div><span class="section-kicker">05 / CLIMA</span><h2>Precipitação diária</h2><p>Chuva registrada no período</p></div><span class="chart-unit">mm</span></div><div class="canvas-wrap"><canvas id="rain-chart"></canvas></div></article>
       </section>
 
-      <section class="section-block executive-section"><div class="section-heading"><div><span class="section-kicker">06 / RESUMO</span><h2>Resumo executivo</h2></div><span class="live-label"><i class="status-dot"></i>Dados ao vivo</span></div><div class="executive-grid" id="executive-summary"></div></section>
 
       <section class="section-block interactive-section"><div class="section-heading"><div><span class="section-kicker">07 / EXPLORAÇÃO</span><h2>Produção por serviço</h2></div><label class="select-label">SERVIÇO<select id="service-select"></select></label></div><div class="interactive-grid"><div class="production-callout"><span class="kpi-label">ACUMULADO DO SERVIÇO</span><strong id="selected-total">--</strong><span id="selected-meta">Selecione um serviço para detalhar</span><div class="metric-row"><span>Real</span><b id="selected-real">--%</b></div><div class="metric-row"><span>Referência</span><b id="selected-plan">--%</b></div></div><div class="canvas-wrap interactive-chart"><canvas id="selected-chart"></canvas></div></div></section>
     </main>

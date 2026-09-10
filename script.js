@@ -394,13 +394,6 @@ function renderCharts(data, index, stats) {
   });
 }
 
-function renderExecutive(data, stats) {
-  $('executive-summary').innerHTML = data.services.map((service, index) => {
-    const item = stats[index];
-    return `<div class="exec-item"><strong title="${service.name}">${service.name}</strong><div class="exec-data"><b>${formatNumber(item.actualAtDateVolume)}</b><span>/ ${formatNumber(item.planAtDateVolume)}</span><b class="${item.deviation >= 0 ? 'positive' : 'negative'}">${item.deviation >= 0 ? '+' : ''}${formatNumber(item.deviation)} pp</b></div></div>`;
-  }).join('');
-}
-
 function renderSelected(data, index) {
   const service = data.services[state.selectedService];
   const stats = serviceStats(service, data);
@@ -445,7 +438,6 @@ function render(data) {
   updateKpis(data, index, stats);
   renderTable(data, stats);
   renderCharts(data, index, stats);
-  renderExecutive(data, stats);
   populateSelect(data);
   renderSelected(data, index);
 }

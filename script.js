@@ -437,7 +437,7 @@ function render(data) {
 
 async function fetchText(url, options = {}) {
   const controller = new AbortController();
-  const timeout = window.setTimeout(() => controller.abort(), 8000);
+  const timeout = window.setTimeout(() => controller.abort(), 4000);
   try {
     return await fetch(url, { ...options, signal: controller.signal });
   } finally {
@@ -451,14 +451,6 @@ async function fetchCsv(url, gid, localUrl) {
     if (!response.ok) throw new Error(`CSV indisponível (${response.status})`);
     return response.text();
   } catch (directError) {
-    try {
-      const fallbackUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const fallbackResponse = await fetchText(fallbackUrl, { cache: 'no-store' });
-      if (fallbackResponse.ok) return fallbackResponse.text();
-    } catch (fallbackError) {
-      console.info('Planilha remota indisponível; tentando snapshot local.', fallbackError);
-    }
-
     const localResponse = await fetch(localUrl, { cache: 'no-store' });
     if (!localResponse.ok) throw directError;
     return localResponse.text();

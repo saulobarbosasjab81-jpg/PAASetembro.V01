@@ -154,7 +154,7 @@ function serviceStats(service, data) {
   let status = 'atrasado';
   if (actualAtDate >= 99.5 && planAtDate >= 99.5) status = 'concluido';
   else if (deviation > 0) status = 'adiantado';
-  else if (deviation >= -5) status = 'risco';
+  else if (deviation > -10 && deviation < -5) status = 'risco';
 
   return {
     planCumulative,

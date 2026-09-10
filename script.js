@@ -451,6 +451,14 @@ async function fetchCsv(url, gid, localUrl) {
     if (!response.ok) throw new Error(`CSV indisponível (${response.status})`);
     return response.text();
   } catch (directError) {
+    try {
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+      const proxyResponse = await fetchText(proxyUrl, { cache: 'no-store' });
+      if (proxyResponse.ok) return proxyResponse.text();
+    } catch (proxyError) {
+      console.info('Planilha remota indisponível; tentando snapshot local.', proxyError);
+    }
+
     const localResponse = await fetch(localUrl, { cache: 'no-store' });
     if (!localResponse.ok) throw directError;
     return localResponse.text();

@@ -93,6 +93,7 @@ function readMatrix(matrix) {
   const dailyRainTotal = rainValues.reduce((sum, value) => sum + value, 0);
   const accumulatedRain = isNumericCell(rainRow[30]) ? number(rainRow[30]) : 0;
   const rainTotal = Math.max(accumulatedRain, dailyRainTotal);
+  const weightColumnIndex = dateRow.findIndex(cell => normalize(cell) === 'peso');
 
   const serviceRows = CONFIG.services.map((service, index) => {
     const targetName = normalize(service);
@@ -104,6 +105,7 @@ function readMatrix(matrix) {
     return {
       name: service,
       responsible: CONFIG.responsible[index] || 'Não informado',
+      weight: weightColumnIndex >= 0 && isNumericCell(row[weightColumnIndex]) ? number(row[weightColumnIndex]) : 1,
       values: dateColumns.map(column => {
         const currentValue = row[column.index];
         return isNumericCell(currentValue) ? number(currentValue) : 0;
@@ -182,6 +184,7 @@ function buildData(planning, execution) {
     services: plan.services.map((service, index) => ({
       name: service.name,
       responsible: service.responsible,
+      weight: service.weight,
       plan: service.values,
       actual: real.services[index]?.values || Array(service.values.length).fill(0)
     })),
@@ -273,14 +276,17 @@ function renderCharts(data, index, stats) {
     return Math.max(max, last);
   }, -1);
 
+  const weights = data.services.map(service => service.weight || 1);
+  const weightSum = weights.reduce((sum, weight) => sum + weight, 0) || 1;
+
   const planCurve = labels.map((_, day) => {
-    const total = stats.reduce((sum, item) => sum + (item.planCumulative[day] / (item.planTotal || 1) * 100), 0);
-    return total / stats.length;
+    const total = stats.reduce((sum, item, i) => sum + (item.planCumulative[day] / (item.planTotal || 1) * 100) * weights[i], 0);
+    return total / weightSum;
   });
 
   const actualCurve = labels.map((_, day) => {
-    const total = stats.reduce((sum, item) => sum + (item.actualCumulative[day] / (item.planTotal || 1) * 100), 0);
-    return total / stats.length;
+    const total = stats.reduce((sum, item, i) => sum + (item.actualCumulative[day] / (item.planTotal || 1) * 100) * weights[i], 0);
+    return total / weightSum;
   });
 
   const executedCurve = actualCurve.map((value, day) => (day <= lastActualDay ? value : null));

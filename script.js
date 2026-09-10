@@ -86,13 +86,9 @@ function readMatrix(matrix) {
 
   const rainRow = rows.find(row => normalize(row[0]).includes('chuva') || normalize(row[0]).includes('precipit')) || [];
   const rainValues = dateColumns.map(column => number(rainRow?.[column.index]));
-  const rainTotal = (() => {
-    for (let index = rainRow.length - 1; index >= 0; index -= 1) {
-      const value = rainRow[index];
-      if (isNumericCell(value)) return number(value);
-    }
-    return rainValues.reduce((sum, value) => sum + value, 0);
-  })();
+  const rainTotal = isNumericCell(rainRow[30])
+    ? number(rainRow[30])
+    : rainValues.reduce((sum, value) => sum + value, 0);
 
   const serviceRows = CONFIG.services.map(service => {
     const targetName = normalize(service);

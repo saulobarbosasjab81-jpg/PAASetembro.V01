@@ -385,6 +385,10 @@ function renderCharts(data, index, stats) {
       plugins: { ...chartDefaults.plugins, legend: { display: false } },
       scales: {
         ...chartDefaults.scales,
+        x: {
+          ...chartDefaults.scales.x,
+          ticks: { ...chartDefaults.scales.x.ticks, autoSkip: false, maxTicksLimit: undefined, maxRotation: 60, minRotation: 60 }
+        },
         y: {
           ...chartDefaults.scales.y,
           ticks: { ...chartDefaults.scales.y.ticks, callback: value => `${value} mm` }
@@ -441,7 +445,10 @@ function renderSelected(data, index) {
         }
       },
       scales: {
-        x: chartDefaults.scales.x,
+        x: {
+          ...chartDefaults.scales.x,
+          ticks: { ...chartDefaults.scales.x.ticks, autoSkip: false, maxTicksLimit: undefined, maxRotation: 60, minRotation: 60 }
+        },
         y: { ...chartDefaults.scales.y, position: 'left' },
         y1: {
           position: 'right',

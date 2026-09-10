@@ -338,7 +338,7 @@ function renderCharts(data, index, stats) {
     .map((status, i) => `<span>${statusLabel(status)} <b>${statusCounts[i]}</b></span>`)
     .join('');
 
-  const production = data.services.slice(0, 5);
+  const production = data.services.slice(0, 4);
   makeChart('production-chart', {
     type: 'bar',
     data: {

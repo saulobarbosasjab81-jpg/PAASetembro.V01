@@ -5,6 +5,7 @@
   executionLocal: 'data/executivo.csv',
   planningGid: '1491304880',
   executionGid: '30813009',
+  responsible: ['Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'SO Soares / Sgt Rita', 'SO Soares / Sgt Rita', 'SO Soares', 'Sgt Anderson / Sgt Rita', 'Civil Belém (Sandro)', 'Civil Local (líder de equipe)', 'Sgt Jefferson', 'Sgt Jefferson'],
   services: ['Escavação drenagem para canaletas', 'Lastro de concreto drenagem para canaletas', 'Assentamento de canaletas', 'Arremates de juntas canaletas', 'Terraplenagem faixa de pista: faixa 20mx60m', 'Base solo vermelho (preparação para o TSD - Lado Dir do acostamento)', 'Camada do TSD no acostamento', 'Escavação para caixa separadora de água e óleo', 'Armação da estrutura da caixa separadora de água e óleo', 'Concretagem tampas das canaletas na lateral do pátio (75cmx45cm)', 'Infra do balizamento', 'Conferência geral no projeto de balizamento'],
   start: new Date(2026, 8, 14),
   end: new Date(2026, 9, 11)
@@ -102,6 +103,7 @@ function readMatrix(matrix) {
 
     return {
       name: service,
+      responsible: CONFIG.responsible[index] || 'Não informado',
       values: dateColumns.map(column => {
         const currentValue = row[column.index];
         return isNumericCell(currentValue) ? number(currentValue) : 0;
@@ -179,6 +181,7 @@ function buildData(planning, execution) {
     dates: plan.dates.length ? plan.dates : real.dates,
     services: plan.services.map((service, index) => ({
       name: service.name,
+      responsible: service.responsible,
       plan: service.values,
       actual: real.services[index]?.values || Array(service.values.length).fill(0)
     })),
@@ -224,7 +227,7 @@ function renderTable(data, stats) {
   $('service-table').innerHTML = data.services.map((service, index) => {
     const item = stats[index];
     const unit = item.actualTotal > 999 ? 'un.' : '';
-    return `<tr><td>${service.name}</td><td><div class="dual-bars"><div class="bar-row"><span class="bar-label">Planejado</span><div class="bar-track"><div class="bar-fill plan" style="width:${Math.min(item.planAtDate, 100)}%"></div></div><span class="bar-value">${formatNumber(item.planAtDate)}%</span></div><div class="bar-row"><span class="bar-label">Executado</span><div class="bar-track"><div class="bar-fill actual" style="width:${Math.min(item.actualAtDate, 100)}%"></div></div><span class="bar-value">${formatNumber(item.actualAtDate)}%</span></div></div></td><td class="service-percent">${formatNumber(item.actualAtDate)}%</td><td class="accumulated">${formatNumber(item.actualAtDateVolume)} ${unit}</td><td><span class="badge ${item.status}">${statusLabel(item.status)}</span></td></tr>`;
+    return `<tr><td>${service.name}</td><td class="responsible">${service.responsible}</td><td><div class="dual-bars"><div class="bar-row"><span class="bar-label">Planejado</span><div class="bar-track"><div class="bar-fill plan" style="width:${Math.min(item.planAtDate, 100)}%"></div></div><span class="bar-value">${formatNumber(item.planAtDate)}%</span></div><div class="bar-row"><span class="bar-label">Executado</span><div class="bar-track"><div class="bar-fill actual" style="width:${Math.min(item.actualAtDate, 100)}%"></div></div><span class="bar-value">${formatNumber(item.actualAtDate)}%</span></div></div></td><td class="service-percent"><span class="quantity-plan">Previsto ${formatNumber(item.planAtDateVolume)} ${unit}</span><span class="quantity-actual">Realizado ${formatNumber(item.actualAtDateVolume)} ${unit}</span><strong>${formatNumber(item.actualAtDate)}%</strong></td><td class="accumulated">${formatNumber(item.actualAtDateVolume)} ${unit}</td><td><span class="badge ${item.status}">${statusLabel(item.status)}</span></td></tr>`;
   }).join('');
 }
 
@@ -478,7 +481,7 @@ async function loadDashboard() {
   } catch (error) {
     console.error(error);
     showToast('Falha ao carregar os CSVs. Verifique a publicação das planilhas.');
-    $('service-table').innerHTML = '<tr><td colspan="5" class="loading-cell">Não foi possível carregar os dados remotos. Confira a conexão e tente novamente.</td></tr>';
+    $('service-table').innerHTML = '<tr><td colspan="6" class="loading-cell">Não foi possível carregar os dados remotos. Confira a conexão e tente novamente.</td></tr>';
   }
 }
 

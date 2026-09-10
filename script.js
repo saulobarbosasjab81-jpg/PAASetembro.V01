@@ -154,8 +154,8 @@ function serviceStats(service, data) {
   let status = 'noPrazo';
   if (actualAtDate >= 99.5 && planAtDate >= 99.5) status = 'concluido';
   else if (deviation > 1) status = 'adiantado';
-  else if (deviation >= -5) status = 'noPrazo';
-  else if (deviation >= -10) status = 'risco';
+  else if (deviation >= -1) status = 'noPrazo';
+  else if (deviation >= -5) status = 'risco';
   else if (deviation >= -1000) status = 'atrasado';
 
   return {

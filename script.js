@@ -406,18 +406,50 @@ function renderSelected(data, index) {
     type: 'bar',
     data: {
       labels: data.dates.map(shortDate),
-      datasets: [{
-        label: 'Executado',
-        data: service.actual,
-        backgroundColor: '#5bd6dfaa',
-        borderColor: '#5bd6df',
-        borderWidth: 1,
-        borderRadius: 2
-      }]
+      datasets: [
+        {
+          type: 'bar',
+          label: service.name,
+          data: service.actual,
+          backgroundColor: '#5bd6dfaa',
+          borderColor: '#5bd6df',
+          borderWidth: 1,
+          borderRadius: 2,
+          yAxisID: 'y'
+        },
+        {
+          type: 'line',
+          label: 'Chuva (mm)',
+          data: data.rain,
+          borderColor: '#f2ca61',
+          backgroundColor: '#f2ca6133',
+          fill: true,
+          tension: .35,
+          pointRadius: 3,
+          pointBackgroundColor: '#f2ca61',
+          yAxisID: 'y1'
+        }
+      ]
     },
     options: {
       ...chartDefaults,
-      plugins: { ...chartDefaults.plugins, legend: { display: false } }
+      plugins: {
+        ...chartDefaults.plugins,
+        legend: {
+          display: true,
+          labels: { color: '#83949e', usePointStyle: true, boxWidth: 7, font: { family: 'Manrope', size: 10 } }
+        }
+      },
+      scales: {
+        x: chartDefaults.scales.x,
+        y: { ...chartDefaults.scales.y, position: 'left' },
+        y1: {
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#83949e', font: { family: 'IBM Plex Mono', size: 9 }, callback: value => `${value} mm` },
+          beginAtZero: true
+        }
+      }
     }
   });
 }

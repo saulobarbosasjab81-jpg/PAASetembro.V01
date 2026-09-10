@@ -94,7 +94,7 @@ function readMatrix(matrix) {
   const accumulatedRain = isNumericCell(rainRow[30]) ? number(rainRow[30]) : 0;
   const rainTotal = Math.max(accumulatedRain, dailyRainTotal);
 
-  const serviceRows = CONFIG.services.map(service => {
+  const serviceRows = CONFIG.services.map((service, index) => {
     const targetName = normalize(service);
     const row = rows.find(candidate => {
       const candidateName = normalize(candidate[0]);

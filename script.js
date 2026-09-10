@@ -151,10 +151,12 @@ function serviceStats(service, data) {
   const actualAtDate = planTotal ? actualAtDateVolume / planTotal * 100 : 0;
   const deviation = actualAtDate - planAtDate;
 
-  let status = 'atrasado';
+  let status = 'noPrazo';
   if (actualAtDate >= 99.5 && planAtDate >= 99.5) status = 'concluido';
-  else if (deviation > 0) status = 'adiantado';
-  else if (deviation > -10 && deviation < -5) status = 'risco';
+  else if (deviation > 1) status = 'adiantado';
+  else if (deviation >= -5) status = 'noPrazo';
+  else if (deviation >= -10) status = 'risco';
+  else if (deviation >= -1000) status = 'atrasado';
 
   return {
     planCumulative,
@@ -190,7 +192,7 @@ function setText(id, value) {
 }
 
 function statusLabel(status) {
-  return { concluido: 'Concluído', adiantado: 'Adiantado', risco: 'Risco', atrasado: 'Atrasado' }[status];
+  return { concluido: 'Concluído', adiantado: 'Adiantado', noPrazo: 'No prazo', risco: 'Risco de atraso', atrasado: 'Atrasado' }[status];
 }
 
 function updateKpis(data, index, stats) {
@@ -199,12 +201,13 @@ function updateKpis(data, index, stats) {
   const counts = stats.reduce((acc, item) => {
     acc[item.status] += 1;
     return acc;
-  }, { concluido: 0, adiantado: 0, risco: 0, atrasado: 0 });
+  }, { concluido: 0, adiantado: 0, noPrazo: 0, risco: 0, atrasado: 0 });
 
   setText('kpi-elapsed', `${Math.round(elapsed / totalDays * 100)}%`);
   setText('kpi-elapsed-detail', `${elapsed} de ${totalDays} dias monitorados`);
   setText('kpi-completed', counts.concluido);
   setText('kpi-ahead', counts.adiantado);
+  setText('kpi-on-time', counts.noPrazo);
   setText('kpi-risk', counts.risco);
   setText('kpi-late', counts.atrasado);
 
@@ -308,14 +311,14 @@ function renderCharts(data, index, stats) {
     }
   });
 
-  const statusCounts = ['concluido', 'adiantado', 'risco', 'atrasado'].map(status => stats.filter(item => item.status === status).length);
+  const statusCounts = ['concluido', 'adiantado', 'noPrazo', 'risco', 'atrasado'].map(status => stats.filter(item => item.status === status).length);
   makeChart('status-chart', {
     type: 'doughnut',
     data: {
-      labels: ['Concluído', 'Adiantado', 'Risco', 'Atrasado'],
+      labels: ['Concluído', 'Adiantado', 'No prazo', 'Risco de atraso', 'Atrasado'],
       datasets: [{
         data: statusCounts,
-        backgroundColor: ['#6ce0a6', '#68a7ff', '#f2ca61', '#f07878'],
+        backgroundColor: ['#6ce0a6', '#68a7ff', '#83949e', '#f2ca61', '#f07878'],
         borderColor: '#111b24',
         borderWidth: 4
       }]
@@ -328,7 +331,7 @@ function renderCharts(data, index, stats) {
     }
   });
 
-  $('status-summary').innerHTML = ['concluido', 'adiantado', 'risco', 'atrasado']
+  $('status-summary').innerHTML = ['concluido', 'adiantado', 'noPrazo', 'risco', 'atrasado']
     .map((status, i) => `<span>${statusLabel(status)} <b>${statusCounts[i]}</b></span>`)
     .join('');
 

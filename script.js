@@ -15,7 +15,26 @@ const number = (value) => { const normalized = String(value ?? '').replace(/\s/g
 const formatNumber = (value) => new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 }).format(value);
 const shortDate = (date) => date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
 const normalize = (text) => String(text ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-function parseCsv(text) { return Papa.parse(text, { skipEmptyLines: false }).data; }
+function parseCsvFallback(text) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (quoted) {
+      if (character === '"' && text[index + 1] === '"') { field += '"'; index += 1; }
+      else if (character === '"') quoted = false;
+      else field += character;
+    } else if (character === '"') quoted = true;
+    else if (character === ',') { row.push(field); field = ''; }
+    else if (character === '\n') { row.push(field.replace(/\r$/, '')); rows.push(row); row = []; field = ''; }
+    else field += character;
+  }
+  if (field.length || row.length) { row.push(field.replace(/\r$/, '')); rows.push(row); }
+  return rows;
+}
+function parseCsv(text) { return window.Papa ? Papa.parse(text, { skipEmptyLines: false }).data : parseCsvFallback(text); }
 function readMatrix(matrix) {
   const rows = matrix.filter(row => row.some(cell => String(cell ?? '').trim() !== ''));
   const dateRowIndex = rows.findIndex(row => row.some(cell => /^\d{1,2}[\/]\d{1,2}[\/]\d{2,4}$/.test(String(cell).trim())));
@@ -26,7 +45,7 @@ function readMatrix(matrix) {
   return { dates: dateColumns.map(item => item.date), services: serviceRows, rain: dateColumns.map(column => number(rainRow?.[column.index])) };
 }
 function cumulative(values) { let total = 0; return values.map(value => (total += value)); }
-function latestIndex(data) { const today = new Date(); const inside = data.dates.findIndex(date => date >= CONFIG.start && date <= today); if (inside >= 0) return inside; const available = data.services.reduce((max, service) => { const last = service.values.reduce((index, value, indexValue) => value > 0 ? indexValue : index, -1); return Math.max(max, last); }, -1); return available >= 0 ? available : Math.min(data.dates.length - 1, 0); }
+function latestIndex(data) { const today = new Date(); const inside = data.dates.findIndex(date => date >= CONFIG.start && date <= today); if (inside >= 0) return inside; const available = data.services.reduce((max, service) => { const last = service.actual.reduce((index, value, indexValue) => value > 0 ? indexValue : index, -1); return Math.max(max, last); }, -1); return available >= 0 ? available : Math.min(data.dates.length - 1, 0); }
 function serviceStats(service, data, index) { const planCumulative = cumulative(service.plan); const actualCumulative = cumulative(service.actual); const planTotal = planCumulative.at(-1) || 0; const actualTotal = actualCumulative.at(-1) || 0; const planAtDate = planTotal ? (planCumulative[index] || 0) / planTotal * 100 : 0; const actualAtDate = planTotal ? (actualCumulative[index] || 0) / planTotal * 100 : 0; const deviation = actualAtDate - planAtDate; let status = 'atrasado'; if (actualAtDate >= 99.5 && planAtDate >= 99.5) status = 'concluido'; else if (deviation > 0) status = 'adiantado'; else if (deviation >= -5) status = 'risco'; return { planCumulative, actualCumulative, planTotal, actualTotal, planAtDate, actualAtDate, deviation, status }; }
 function buildData(planning, execution) { const plan = readMatrix(planning); const real = readMatrix(execution); return { dates: plan.dates.length ? plan.dates : real.dates, services: plan.services.map((service, index) => ({ name: service.name, plan: service.values, actual: real.services[index]?.values || Array(service.values.length).fill(0) })), rain: real.rain.length ? real.rain : plan.rain }; }
 function setText(id, value) { $(id).textContent = value; }

@@ -84,7 +84,10 @@ function readMatrix(matrix) {
     return match ? { index, date: new Date(Number(match[3].length === 2 ? `20${match[3]}` : match[3]), Number(match[2]) - 1, Number(match[1])) } : null;
   }).filter(Boolean).slice(0, 28);
 
-  const rainRow = rows.find(row => normalize(row[0]).includes('chuva') || normalize(row[0]).includes('precipit')) || [];
+  const rainRow = rows.find(row => {
+    const label = normalize(row[0]);
+    return label === 'chuva (mm)' || label.startsWith('precipitacao');
+  }) || [];
   const rainValues = dateColumns.map(column => number(rainRow?.[column.index]));
   const rainTotal = isNumericCell(rainRow[30])
     ? number(rainRow[30])

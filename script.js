@@ -6,7 +6,7 @@
   planningGid: '1491304880',
   executionGid: '30813009',
   responsible: ['Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'SO Soares / Sgt Rita', 'SO Soares / Sgt Rita', 'SO Soares', 'Sgt Anderson / Sgt Rita', 'Civil Belém (Sandro)', 'Civil Local (líder de equipe)', 'Sgt Jefferson', 'Sgt Jefferson'],
-  services: ['Escavação drenagem para canaletas', 'Lastro de concreto drenagem para canaletas', 'Assentamento de canaletas', 'Arremates de juntas canaletas', 'Terraplenagem faixa de pista: faixa 20mx60m', 'Base solo vermelho (preparação para o TSD - Lado Dir do acostamento)', 'Camada do TSD no acostamento', 'Escavação para caixa separadora de água e óleo', 'Armação da estrutura da caixa separadora de água e óleo', 'Concretagem tampas das canaletas na lateral do pátio (75cmx45cm)', 'Infra do balizamento', 'Conferência geral no projeto de balizamento'],
+  services: ['Escavação drenagem para canaletas', 'Lastro de concreto drenagem para canaletas', 'Assentamento de canaletas', 'Arremates de juntas canaletas', 'Terraplenagem faixa de pista', 'Base solo vermelho (preparação para o TSD - Lado Dir do acostamento)', 'Camada do TSD no acostamento', 'Escavação para caixa separadora de água e óleo', 'Armação da estrutura da caixa separadora de água e óleo', 'Concretagem tampas das canaletas na lateral do pátio (75cmx45cm)', 'Infra do balizamento', 'Conferência geral no projeto de balizamento'],
   start: new Date(2026, 8, 14),
   end: new Date(2026, 9, 11)
 };

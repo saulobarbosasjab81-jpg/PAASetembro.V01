@@ -40,7 +40,7 @@ function readMatrix(matrix) {
   const dateRowIndex = rows.findIndex(row => row.some(cell => /^\d{1,2}[\/]\d{1,2}[\/]\d{2,4}$/.test(String(cell).trim())));
   const dateRow = dateRowIndex >= 0 ? rows[dateRowIndex] : [];
   const dateColumns = dateRow.map((value, index) => { const match = String(value).trim().match(/^(\d{1,2})[\/]([0-9]{1,2})[\/]([0-9]{2,4})$/); return match ? { index, date: new Date(Number(match[3].length === 2 ? `20${match[3]}` : match[3]), Number(match[2]) - 1, Number(match[1])) } : null; }).filter(Boolean).slice(0, 28);
-  const serviceRows = CONFIG.services.map(service => { const row = rows.find(candidate => normalize(candidate[0]).includes(normalize(service)) || normalize(service).includes(normalize(candidate[0]))); return { name: service, values: dateColumns.map(column => number(row?.[column.index])) }; });
+  const serviceRows = CONFIG.services.map(service => { const targetName = normalize(service); const row = rows.find(candidate => { const candidateName = normalize(candidate[0]); return candidateName && (candidateName.includes(targetName) || targetName.includes(candidateName)); }); return { name: service, values: dateColumns.map(column => number(row?.[column.index])) }; });
   const rainRow = rows.find(row => normalize(row[0]).includes('chuva') || normalize(row[0]).includes('precipit'));
   return { dates: dateColumns.map(item => item.date), services: serviceRows, rain: dateColumns.map(column => number(rainRow?.[column.index])) };
 }

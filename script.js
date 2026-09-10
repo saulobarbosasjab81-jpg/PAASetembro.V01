@@ -89,9 +89,9 @@ function readMatrix(matrix) {
     return label === 'chuva (mm)' || label.startsWith('precipitacao');
   }) || [];
   const rainValues = dateColumns.map(column => number(rainRow?.[column.index]));
-  const rainTotal = isNumericCell(rainRow[30])
-    ? number(rainRow[30])
-    : rainValues.reduce((sum, value) => sum + value, 0);
+  const dailyRainTotal = rainValues.reduce((sum, value) => sum + value, 0);
+  const accumulatedRain = isNumericCell(rainRow[30]) ? number(rainRow[30]) : 0;
+  const rainTotal = Math.max(accumulatedRain, dailyRainTotal);
 
   const serviceRows = CONFIG.services.map(service => {
     const targetName = normalize(service);

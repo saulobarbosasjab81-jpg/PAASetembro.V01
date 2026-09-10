@@ -1,0 +1,36 @@
+name: Sync Google Sheets data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download published sheets
+        shell: bash
+        run: |
+          mkdir -p data
+          curl --fail --location --silent --show-error \
+            'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFO5I2IkYLgaisfniLVjlPFyTAaPVPCFji4zA3-AQ3NWhAfVhDFt08jk3Ayee4Zw/pub?gid=1491304880&single=true&output=csv' \
+            --output data/base-line.csv
+          curl --fail --location --silent --show-error \
+            'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFO5I2IkYLgaisfniLVjlPFyTAaPVPCFji4zA3-AQ3NWhAfVhDFt08jk3Ayee4Zw/pub?gid=30813009&single=true&output=csv' \
+            --output data/executivo.csv
+
+      - name: Publish refreshed data
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/base-line.csv data/executivo.csv
+          git diff --cached --quiet || git commit -m 'Sync dashboard data from Google Sheets'
+          git push

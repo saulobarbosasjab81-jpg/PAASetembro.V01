@@ -1,6 +1,8 @@
 const CONFIG = {
   planningUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFO5I2IkYLgaisfniLVjlPFyTAaPVPCFji4zA3-AQ3NWhAfVhDFt08jk3Ayee4Zw/pub?gid=1491304880&single=true&output=csv',
   executionUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRFO5I2IkYLgaisfniLVjlPFyTAaPVPCFji4zA3-AQ3NWhAfVhDFt08jk3Ayee4Zw/pub?gid=30813009&single=true&output=csv',
+  planningLocal: 'data/base-line.csv',
+  executionLocal: 'data/executivo.csv',
   planningGid: '1491304880',
   executionGid: '30813009',
   services: ['Escavação drenagem para canaletas', 'Lastro de concreto drenagem para canaletas', 'Assentamento de canaletas', 'Arremates de juntas canaletas', 'Terraplenagem faixa de pista: faixa 20mx60m', 'Base solo vermelho (preparação para o TSD - Lado Dir do acostamento)', 'Camada do TSD no acostamento', 'Escavação para caixa separadora de água e óleo', 'Armação da estrutura da caixa separadora de água e óleo', 'Concretagem tampas das canaletas na lateral do pátio (75cmx45cm)', 'Infra do balizamento', 'Conferência geral no projeto de balizamento'],
@@ -38,7 +40,13 @@ function renderExecutive(data, stats) { $('executive-summary').innerHTML = data.
 function renderSelected(data, index) { const service = data.services[state.selectedService]; const stats = serviceStats(service, data, index); setText('selected-total', formatNumber(stats.actualTotal)); setText('selected-meta', service.name); setText('selected-real', `${formatNumber(stats.actualAtDate)}%`); setText('selected-plan', `${formatNumber(stats.planAtDate)}%`); makeChart('selected-chart', { type: 'bar', data: { labels: data.dates.map(shortDate), datasets: [{ label: 'Executado', data: service.actual, backgroundColor: '#5bd6dfaa', borderColor: '#5bd6df', borderWidth: 1, borderRadius: 2 }] }, options: { ...chartDefaults, plugins: { ...chartDefaults.plugins, legend: { display: false } } } }); }
 function populateSelect(data) { $('service-select').innerHTML = data.services.map((service, index) => `<option value="${index}">${service.name}</option>`).join(''); $('service-select').addEventListener('change', event => { state.selectedService = Number(event.target.value); renderSelected(data, latestIndex(data)); }); }
 function render(data) { state.data = data; const index = latestIndex(data); const stats = data.services.map(service => serviceStats(service, data, index)); updateKpis(data, index, stats); renderTable(data, stats); renderCharts(data, index, stats); renderExecutive(data, stats); populateSelect(data); renderSelected(data, index); }
-async function fetchCsv(url, gid) {
+async function fetchCsv(url, gid, localUrl) {
+  try {
+    const localResponse = await fetch(localUrl, { cache: 'no-store' });
+    if (localResponse.ok) return localResponse.text();
+  } catch (localError) {
+    console.info('Snapshot local indisponível; tentando planilha remota.', localError);
+  }
   try {
     const response = await fetch(url, { cache: 'no-store' });
     if (!response.ok) throw new Error(`CSV indisponível (${response.status})`);
@@ -50,6 +58,6 @@ async function fetchCsv(url, gid) {
     return fallbackResponse.text();
   }
 }
-async function loadDashboard() { try { showToast('Atualizando dados...'); const [planningCsv, executionCsv] = await Promise.all([fetchCsv(CONFIG.planningUrl, CONFIG.planningGid), fetchCsv(CONFIG.executionUrl, CONFIG.executionGid)]); render(buildData(parseCsv(planningCsv), parseCsv(executionCsv))); showToast('Dados atualizados com sucesso.'); } catch (error) { console.error(error); showToast('Falha ao carregar os CSVs. Verifique a publicação das planilhas.'); $('service-table').innerHTML = '<tr><td colspan="5" class="loading-cell">Não foi possível carregar os dados remotos. Confira a conexão e tente novamente.</td></tr>'; } }
+async function loadDashboard() { try { showToast('Atualizando dados...'); const [planningCsv, executionCsv] = await Promise.all([fetchCsv(CONFIG.planningUrl, CONFIG.planningGid, CONFIG.planningLocal), fetchCsv(CONFIG.executionUrl, CONFIG.executionGid, CONFIG.executionLocal)]); render(buildData(parseCsv(planningCsv), parseCsv(executionCsv))); showToast('Dados atualizados com sucesso.'); } catch (error) { console.error(error); showToast('Falha ao carregar os CSVs. Verifique a publicação das planilhas.'); $('service-table').innerHTML = '<tr><td colspan="5" class="loading-cell">Não foi possível carregar os dados remotos. Confira a conexão e tente novamente.</td></tr>'; } }
 function showToast(message) { const toast = $('toast'); toast.textContent = message; toast.classList.add('visible'); window.clearTimeout(showToast.timer); showToast.timer = window.setTimeout(() => toast.classList.remove('visible'), 3500); }
 document.addEventListener('DOMContentLoaded', () => { $('refresh-button').addEventListener('click', loadDashboard); loadDashboard(); });

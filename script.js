@@ -5,8 +5,8 @@
   executionLocal: 'data/executivo.csv',
   planningGid: '1491304880',
   executionGid: '30813009',
+  // Sem coluna de responsável na planilha; mapeado por posição na ordem das linhas de serviço do Base_Line.
   responsible: ['Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'Sgt Talles / Sgt Tilman', 'SO Soares / Sgt Rita', 'SO Soares / Sgt Rita', 'SO Soares', 'Sgt Anderson / Sgt Rita', 'Civil Belém (Sandro)', 'Civil Local (líder de equipe)', 'Sgt Jefferson', 'Sgt Jefferson'],
-  services: ['Escavação drenagem para canaletas', 'Lastro de concreto drenagem para canaletas', 'Assentamento de canaletas', 'Arremates de juntas canaletas', 'Terraplenagem faixa de pista', 'Base solo vermelho (preparação para o TSD - dois lados do acostamento)', 'Camada do TSD no acostamento', 'Escavação para caixa separadora de água e óleo', 'Armação da estrutura da caixa separadora de água e óleo', 'Concretagem tampas das canaletas na lateral do pátio (75cmx45cm)', 'Infra do balizamento', 'Conferência geral no material do balizamento em Manaus'],
   start: new Date(2026, 8, 14),
   end: new Date(2026, 9, 11)
 };
@@ -95,23 +95,19 @@ function readMatrix(matrix) {
   const rainTotal = Math.max(accumulatedRain, dailyRainTotal);
   const weightColumnIndex = dateRow.findIndex(cell => normalize(cell) === 'peso');
 
-  const serviceRows = CONFIG.services.map((service, index) => {
-    const targetName = normalize(service);
-    const row = rows.find(candidate => {
-      const candidateName = normalize(candidate[0]);
-      return candidateName && (candidateName.includes(targetName) || targetName.includes(candidateName));
-    }) || [];
-
-    return {
-      name: service,
-      responsible: CONFIG.responsible[index] || 'Não informado',
+  const serviceRows = rows.slice(dateRowIndex + 1)
+    .filter(row => {
+      const label = normalize(row[0]);
+      return label && label !== 'chuva (mm)' && !label.startsWith('precipitacao');
+    })
+    .map(row => ({
+      name: String(row[0]).trim(),
       weight: weightColumnIndex >= 0 && isNumericCell(row[weightColumnIndex]) ? number(row[weightColumnIndex]) : 1,
       values: dateColumns.map(column => {
         const currentValue = row[column.index];
         return isNumericCell(currentValue) ? number(currentValue) : 0;
       })
-    };
-  });
+    }));
 
   return {
     dates: dateColumns.map(item => item.date),
@@ -181,13 +177,21 @@ function buildData(planning, execution) {
   const real = readMatrix(execution);
   return {
     dates: plan.dates.length ? plan.dates : real.dates,
-    services: plan.services.map((service, index) => ({
-      name: service.name,
-      responsible: service.responsible,
-      weight: service.weight,
-      plan: service.values,
-      actual: real.services[index]?.values || Array(service.values.length).fill(0)
-    })),
+    services: plan.services.map((service, index) => {
+      const targetName = normalize(service.name);
+      const match = real.services.find(candidate => {
+        const candidateName = normalize(candidate.name);
+        return candidateName && (candidateName.includes(targetName) || targetName.includes(candidateName));
+      });
+
+      return {
+        name: service.name,
+        responsible: CONFIG.responsible[index] || 'Não informado',
+        weight: service.weight,
+        plan: service.values,
+        actual: match ? match.values : Array(service.values.length).fill(0)
+      };
+    }),
     rain: real.rain.length ? real.rain : plan.rain,
     rainTotal: Number.isFinite(real.rainTotal) ? real.rainTotal : plan.rainTotal
   };

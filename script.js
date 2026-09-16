@@ -410,7 +410,7 @@ function renderCharts(data, index, stats) {
 function renderSelected(data, index) {
   const service = data.services[state.selectedService];
   const stats = serviceStats(service, data, index);
-  setText('selected-total', formatNumber(stats.actualTotal));
+  setText('selected-total', `${formatNumber(stats.actualTotal)} / ${formatNumber(stats.planTotal)}`);
   setText('selected-meta', service.name);
   setText('selected-real', `${formatNumber(stats.actualAtDate)}%`);
   setText('selected-plan', `${formatNumber(stats.planAtDate)}%`);

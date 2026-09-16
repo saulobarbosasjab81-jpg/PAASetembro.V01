@@ -138,13 +138,12 @@ function latestServiceIndex(service) {
   return lastFilled;
 }
 
-function serviceStats(service, data) {
+function serviceStats(service, data, currentIndex) {
   const planCumulative = cumulative(service.plan);
   const actualCumulative = cumulative(service.actual);
   const planTotal = planCumulative.at(-1) || 0;
   const actualTotal = actualCumulative.at(-1) || 0;
-  const index = latestServiceIndex(service) >= 0 ? latestServiceIndex(service) : 0;
-  const safeIndex = Math.min(index, Math.max(planCumulative.length - 1, 0));
+  const safeIndex = Math.min(currentIndex, Math.max(planCumulative.length - 1, 0));
   const planAtDateVolume = planCumulative[safeIndex] || 0;
   const actualAtDateVolume = actualCumulative[safeIndex] || 0;
   const planAtDate = planTotal ? planAtDateVolume / planTotal * 100 : 0;
@@ -410,7 +409,7 @@ function renderCharts(data, index, stats) {
 
 function renderSelected(data, index) {
   const service = data.services[state.selectedService];
-  const stats = serviceStats(service, data);
+  const stats = serviceStats(service, data, index);
   setText('selected-total', formatNumber(stats.actualTotal));
   setText('selected-meta', service.name);
   setText('selected-real', `${formatNumber(stats.actualAtDate)}%`);
@@ -482,7 +481,7 @@ function populateSelect(data) {
 function render(data) {
   state.data = data;
   const index = latestIndex(data);
-  const stats = data.services.map(service => serviceStats(service, data));
+  const stats = data.services.map(service => serviceStats(service, data, index));
 
   updateKpis(data, index, stats);
   renderTable(data, stats);
